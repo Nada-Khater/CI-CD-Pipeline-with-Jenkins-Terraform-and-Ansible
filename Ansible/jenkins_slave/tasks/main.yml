@@ -1,0 +1,60 @@
+---
+# tasks file for jenkins_slave
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Install Java
+  apt:
+    name: openjdk-11-jdk
+    state: present
+
+- name: Create ubuntu Slave Folder
+  file:
+    path: "jenkins_slave"
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: '0755'
+
+- name: Install Docker
+  apt:
+    name: docker.io
+    state: present
+    update_cache: yes
+
+- name: Add ubuntu user to docker group
+  user:
+    name: ubuntu
+    groups: docker
+    append: yes
+
+- name: Install curl, gnupg, and unzip
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - curl
+    - gnupg
+    - unzip
+
+- name: Download and install Terraform
+  get_url:
+    url: "https://releases.hashicorp.com/terraform/1.8.3/terraform_1.8.3_linux_amd64.zip"
+    dest: "/tmp/terraform.zip"
+
+- name: Unzip Terraform
+  unarchive:
+    src: "/tmp/terraform.zip"
+    dest: "/usr/local/bin/"
+    remote_src: yes
+
+- name: Set permissions for Terraform
+  file:
+    path: "/usr/local/bin/terraform"
+    mode: "0755"
+
+- name: Clean up Terraform zip file
+  file:
+    path: "/tmp/terraform.zip"
+    state: absent
