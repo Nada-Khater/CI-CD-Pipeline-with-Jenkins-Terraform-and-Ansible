@@ -42,4 +42,12 @@ resource "aws_security_group" "allow_ssh_port_3000_vpc_cidr" {
     # cidr_blocks = [aws_vpc.main-vpc.cidr_block]
     cidr_blocks = [module.network.vpc_cidr]
   }
+
+    # Define egress (outbound) rules
+  egress {
+    from_port = var.egress_TCP_port
+    to_port   = var.egress_TCP_port
+    protocol  = var.egress_protocol
+    cidr_blocks = [var.cidr_block]  # Allow all outbound traffic for application ec2
+  }
 }
