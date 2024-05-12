@@ -3,3 +3,11 @@
 
 [slave]
 18.201.237.159
+
+[app]
+10.0.3.161
+
+[app:vars]
+ansible_user = ubuntu
+ansible_ssh_private_key_file = ssh-key.pem
+ansible_ssh_common_args = "-o ProxyCommand=\"ssh -i ssh-key.pem ubuntu@34.251.124.64 -W %h:%p\""

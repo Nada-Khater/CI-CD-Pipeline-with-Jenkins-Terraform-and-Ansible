@@ -16,11 +16,11 @@ resource "aws_route_table" "public-rt" {
 resource "aws_route_table" "private-rt" {
   vpc_id = aws_vpc.main-vpc.id
 
-#   # Add a route to the NAT Gateway for internet access
-#   route {
-#     cidr_block     = var.cidr_block
-#     nat_gateway_id = aws_nat_gateway.Nat-gw.id
-#   }
+  # Add a route to the NAT Gateway for internet access
+  route {
+    cidr_block     = var.cidr_block
+    nat_gateway_id = aws_nat_gateway.Nat-gw.id
+  }
 
   tags = {
     Name = "private-rt"

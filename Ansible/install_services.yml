@@ -1,5 +1,5 @@
 ---
-- hosts: slave
+- hosts: app
   name: test playbook
   remote_user: ubuntu
   become: yes
