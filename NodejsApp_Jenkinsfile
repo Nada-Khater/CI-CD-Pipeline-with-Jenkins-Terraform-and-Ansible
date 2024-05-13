@@ -1,0 +1,56 @@
+pipeline {
+    agent { 
+        label 'private_slave'
+    }
+    
+    environment {
+        RDS_HOSTNAME   = credentials('RDS_HOSTNAME')
+        RDS_USERNAME   = credentials('RDS_USERNAME')
+        RDS_PASSWORD   = credentials('RDS_PASSWORD')
+        RDS_PORT       = credentials('RDS_PORT')
+        REDIS_HOSTNAME = credentials('REDIS_HOSTNAME')
+        REDIS_PORT     = credentials('REDIS_PORT')
+    }
+    
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: 'rds_redis', url: 'https://github.com/Nada-Khater/jenkins_nodejs_example.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                script {
+                    sh 'docker build -f dockerfile -t nodejsapp .'
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    sh '''
+                        docker run -d -p 3000:3000 \
+                        -e RDS_HOSTNAME \
+                        -e RDS_USERNAME \
+                        -e RDS_PASSWORD \
+                        -e RDS_PORT \
+                        -e REDIS_HOSTNAME \
+                        -e REDIS_PORT \
+                        --name nodejsapp_container nodejsapp
+                    '''
+                }
+            }
+        }
+    }
+
+    // post {
+    //     success {
+    //         echo 'Pipeline completed successfully'
+    //     }
+    //     failure {
+    //         echo 'Pipeline failed'
+    //     }
+    // }
+}
