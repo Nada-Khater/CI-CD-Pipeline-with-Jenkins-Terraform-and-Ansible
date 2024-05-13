@@ -20,5 +20,5 @@ resource "aws_elasticache_cluster" "Terraform_elasticache" {
 
 // Extracting Redis credentials
 output "redis_hostname" {
-  value = aws_elasticache_cluster.Terraform_elasticache.configuration_endpoint_address
+  value = aws_elasticache_cluster.Terraform_elasticache.configuration_endpoint
 }

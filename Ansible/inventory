@@ -6,7 +6,7 @@
 
 # app private ip
 [app]
-10.0.3.156
+10.0.3.156  # app private ip
 
 [app:vars]
 ansible_user = ubuntu
