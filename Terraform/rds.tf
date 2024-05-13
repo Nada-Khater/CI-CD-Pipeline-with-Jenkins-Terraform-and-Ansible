@@ -30,5 +30,5 @@ resource "aws_db_instance" "Terraform_rds" {
 # Saving rds password to be added in jenkins credentials
 resource "local_file" "rds_password_file" {
   content  = aws_db_instance.Terraform_rds.password
-  filename = "${path.module}/rds_pass.txt"
+  filename = "rds_pass.txt"
 }
