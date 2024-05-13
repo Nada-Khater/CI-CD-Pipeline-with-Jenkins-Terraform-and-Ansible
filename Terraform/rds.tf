@@ -27,14 +27,8 @@ resource "aws_db_instance" "Terraform_rds" {
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
 }
 
-
-// Extracting RDS credentials
-output "rds_password" {
-  value = random_password.rds_password.result
+# Saving rds password to be added in jenkins credentials
+resource "local_file" "rds_password_file" {
+  content  = aws_db_instance.Terraform_rds.password
+  filename = "${path.module}/rds_pass.txt"
 }
-
-output "rds_hostname" {
-  value = aws_db_instance.Terraform_rds.address
-}
-
-
