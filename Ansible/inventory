@@ -4,6 +4,7 @@
 [slave]
 3.252.214.119
 
+# app private ip
 [app]
 10.0.3.156
 
