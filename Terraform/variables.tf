@@ -38,6 +38,16 @@ variable ingress_TCP_port2 {
   description = "Ingress TCP Port 2"
 }
 
+variable rds_port {
+  type        = number
+  description = "RDS Port"
+}
+
+variable redis_port {
+  type        = number
+  description = "REDIS Port"
+}
+
 variable egress_TCP_port {
   type        = number
   description = "Egress TCP Port"
