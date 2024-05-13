@@ -94,7 +94,7 @@ resource "aws_security_group" "rds_sg" {
 
 # Define a security group for alb
 resource "aws_security_group" "alb_sg" {
-  vpc_id        = aws_vpc.main-vpc.id
+  vpc_id        = module.network.vpc_id
 
   ingress {
     from_port   = 80
