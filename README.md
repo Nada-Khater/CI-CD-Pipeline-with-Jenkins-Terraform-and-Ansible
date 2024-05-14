@@ -59,7 +59,7 @@ The project aims to automate the infrastructure provisioning and deployment proc
    ```
    ansible-playbook -i inventory --private-key /PATH_TO_YOUR_PRIVATE_KEY.pem install_services.yml
    ```
-5. Create 2 ec2 instances **ubuntu**  `master/public_slave` 
+5. Create two ec2 instances **ubuntu**  `master/public_slave` 
 - Then configure in jenkins master the another ec2 to be jenkins slave (public)
     <img src="https://github.com/Nada-Khater/CI-CD-Pipeline-with-Jenkins-Terraform-and-Ansible/assets/75952748/a29f56a9-e4c9-4024-a596-600007a2b9d7" width="920">
 6. Configure your AWS credentials on jenkins master
