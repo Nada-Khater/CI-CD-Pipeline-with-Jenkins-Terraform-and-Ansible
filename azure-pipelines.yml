@@ -64,11 +64,13 @@ stages:
         commandOptions: '-var-file=${{ parameters.ENV }}.tfvars'
       displayName: 'Terraform Plan'
 
-- stage: Apply
-  condition: and(eq(variables['Build.Reason'], 'Merge'), eq(variables['ACTION'], 'apply'))
+- stage: CD
+  dependsOn: InitAndPlan
+  condition: succeeded()
   jobs:
   - job: TerraformApply
     displayName: 'Terraform Apply'
+    condition: and(eq(variables['Build.Reason'], 'Merge'), eq(variables['ACTION'], 'apply'))
     steps:
     - task: TerraformInstaller@0
       inputs:
@@ -95,11 +97,9 @@ stages:
         commandOptions: '-auto-approve -var-file=${{ parameters.ENV }}.tfvars'
       displayName: 'Terraform Apply'
 
-- stage: Destroy
-  condition: and(eq(variables['Build.Reason'], 'Merge'), eq(variables['ACTION'], 'destroy'))
-  jobs:
   - job: TerraformDestroy
     displayName: 'Terraform Destroy'
+    condition: and(eq(variables['Build.Reason'], 'Merge'), eq(variables['ACTION'], 'destroy'))
     steps:
     - task: TerraformInstaller@0
       inputs:
