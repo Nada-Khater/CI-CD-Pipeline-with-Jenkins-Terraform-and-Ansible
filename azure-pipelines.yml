@@ -26,12 +26,13 @@ pool:
 
 variables:
   AWS_SERVICE_CONNECTION: 'ado_terraform'
+  ACTION: ${{ parameters.ACTION }}  # Capture the ACTION parameter as a variable
 
 stages:
-- stage: Init
+- stage: InitAndPlan
   jobs:
-  - job: TerraformInit
-    displayName: 'Terraform Init'
+  - job: TerraformInitAndPlan
+    displayName: 'Terraform Init and Plan'
     steps:
     - script: |
         sudo apt-get update
@@ -41,7 +42,7 @@ stages:
     - task: TerraformInstaller@0
       inputs:
         terraformVersion: 'latest'
-    
+
     - task: TerraformTaskV2@2
       inputs:
         provider: 'aws'
@@ -52,16 +53,6 @@ stages:
         backendAWSKey: 'terraform.tfstate'
       displayName: 'Terraform Init'
 
-- stage: Plan
-  condition: eq(variables['Build.Reason'], 'PullRequest')
-  jobs:
-  - job: TerraformPlan
-    displayName: 'Terraform Plan on PR'
-    steps:    
-    - task: TerraformInstaller@0
-      inputs:
-        terraformVersion: 'latest'
-    
     - task: TerraformTaskV2@2
       inputs:
         provider: 'aws'
@@ -73,23 +64,44 @@ stages:
         commandOptions: '-var-file=${{ parameters.ENV }}.tfvars'
       displayName: 'Terraform Plan'
 
-- stage: ApplyOrDestroy
-  condition: eq(variables['Build.Reason'], 'Merge')
+- stage: Apply
+  condition: and(succeeded(), eq(variables['Build.Reason'], 'Merge'), eq(variables['ACTION'], 'apply'))
   jobs:
-  - job: TerraformApplyOrDestroy
-    displayName: 'Terraform Apply or Destroy on Merge'
+  - job: TerraformApply
+    displayName: 'Terraform Apply'
     steps:
     - task: TerraformInstaller@0
       inputs:
         terraformVersion: 'latest'
-    
+
     - task: TerraformTaskV2@2
       inputs:
         provider: 'aws'
-        command: ${{ parameters.ACTION }}
+        command: 'apply'
         backendServiceAWS: $(AWS_SERVICE_CONNECTION)
         backendAWSBucketName: 'terraform-nada'
         backendAWSKey: 'terraform.tfstate'
         workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform'
         commandOptions: '-auto-approve -var-file=${{ parameters.ENV }}.tfvars'
-      displayName: 'Terraform Apply or Destroy'
+      displayName: 'Terraform Apply'
+
+- stage: Destroy
+  condition: and(succeeded(), eq(variables['Build.Reason'], 'Merge'), eq(variables['ACTION'], 'destroy'))
+  jobs:
+  - job: TerraformDestroy
+    displayName: 'Terraform Destroy'
+    steps:
+    - task: TerraformInstaller@0
+      inputs:
+        terraformVersion: 'latest'
+
+    - task: TerraformTaskV2@2
+      inputs:
+        provider: 'aws'
+        command: 'destroy'
+        backendServiceAWS: $(AWS_SERVICE_CONNECTION)
+        backendAWSBucketName: 'terraform-nada'
+        backendAWSKey: 'terraform.tfstate'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform'
+        commandOptions: '-auto-approve -var-file=${{ parameters.ENV }}.tfvars'
+      displayName: 'Terraform Destroy'
