@@ -26,7 +26,7 @@ pool:
 
 variables:
   AWS_SERVICE_CONNECTION: 'ado_terraform'
-  ACTION: ${{ parameters.ACTION }}  # Capture the ACTION parameter as a variable
+  ACTION: ${{ parameters.ACTION }}
 
 stages:
 - stage: InitAndPlan
@@ -48,7 +48,7 @@ stages:
         provider: 'aws'
         command: 'init'
         workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform'
-        backendServiceAWS: $(AWS_SERVICE_CONNECTION)
+        environmentServiceNameAWS: $(AWS_SERVICE_CONNECTION)
         backendAWSBucketName: 'terraform-nada'
         backendAWSKey: 'terraform.tfstate'
       displayName: 'Terraform Init'
@@ -57,7 +57,7 @@ stages:
       inputs:
         provider: 'aws'
         command: 'plan'
-        backendServiceAWS: $(AWS_SERVICE_CONNECTION)
+        environmentServiceNameAWS: $(AWS_SERVICE_CONNECTION)
         backendAWSBucketName: 'terraform-nada'
         backendAWSKey: 'terraform.tfstate'
         workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform'
@@ -65,7 +65,7 @@ stages:
       displayName: 'Terraform Plan'
 
 - stage: Apply
-  condition: and(succeeded(), eq(variables['Build.Reason'], 'Merge'), eq(variables['ACTION'], 'apply'))
+  condition: and(eq(variables['Build.Reason'], 'Merge'), eq(variables['ACTION'], 'apply'))
   jobs:
   - job: TerraformApply
     displayName: 'Terraform Apply'
@@ -78,7 +78,7 @@ stages:
       inputs:
         provider: 'aws'
         command: 'apply'
-        backendServiceAWS: $(AWS_SERVICE_CONNECTION)
+        environmentServiceNameAWS: $(AWS_SERVICE_CONNECTION)
         backendAWSBucketName: 'terraform-nada'
         backendAWSKey: 'terraform.tfstate'
         workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform'
@@ -86,7 +86,7 @@ stages:
       displayName: 'Terraform Apply'
 
 - stage: Destroy
-  condition: and(succeeded(), eq(variables['Build.Reason'], 'Merge'), eq(variables['ACTION'], 'destroy'))
+  condition: and(eq(variables['Build.Reason'], 'Merge'), eq(variables['ACTION'], 'destroy'))
   jobs:
   - job: TerraformDestroy
     displayName: 'Terraform Destroy'
@@ -99,7 +99,7 @@ stages:
       inputs:
         provider: 'aws'
         command: 'destroy'
-        backendServiceAWS: $(AWS_SERVICE_CONNECTION)
+        environmentServiceNameAWS: $(AWS_SERVICE_CONNECTION)
         backendAWSBucketName: 'terraform-nada'
         backendAWSKey: 'terraform.tfstate'
         workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform'
