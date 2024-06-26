@@ -48,7 +48,7 @@ stages:
         provider: 'aws'
         command: 'init'
         workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform'
-        environmentServiceNameAWS: $(AWS_SERVICE_CONNECTION)
+        backendServiceAWS: $(AWS_SERVICE_CONNECTION)
         backendAWSBucketName: 'terraform-nada'
         backendAWSKey: 'terraform.tfstate'
       displayName: 'Terraform Init'
