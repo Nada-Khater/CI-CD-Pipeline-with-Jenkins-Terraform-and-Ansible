@@ -77,6 +77,16 @@ stages:
     - task: TerraformTaskV2@2
       inputs:
         provider: 'aws'
+        command: 'init'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform'
+        backendServiceAWS: $(AWS_SERVICE_CONNECTION)
+        backendAWSBucketName: 'terraform-nada'
+        backendAWSKey: 'terraform.tfstate'
+      displayName: 'Terraform Init'
+
+    - task: TerraformTaskV2@2
+      inputs:
+        provider: 'aws'
         command: 'apply'
         environmentServiceNameAWS: $(AWS_SERVICE_CONNECTION)
         backendAWSBucketName: 'terraform-nada'
@@ -94,6 +104,16 @@ stages:
     - task: TerraformInstaller@0
       inputs:
         terraformVersion: 'latest'
+
+    - task: TerraformTaskV2@2
+      inputs:
+        provider: 'aws'
+        command: 'init'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform'
+        backendServiceAWS: $(AWS_SERVICE_CONNECTION)
+        backendAWSBucketName: 'terraform-nada'
+        backendAWSKey: 'terraform.tfstate'
+      displayName: 'Terraform Init'
 
     - task: TerraformTaskV2@2
       inputs:
