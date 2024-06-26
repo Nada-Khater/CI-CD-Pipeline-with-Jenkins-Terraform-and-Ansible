@@ -1,0 +1,95 @@
+parameters:
+- name: ENV
+  displayName: 'Environment'
+  type: string
+  default: 'dev'
+  values:
+    - 'dev'
+    - 'prod'
+
+- name: ACTION
+  displayName: 'Action'
+  type: string
+  default: 'apply'
+  values:
+    - 'apply'
+    - 'destroy'
+
+trigger:
+- main
+
+pr:
+- '*'
+
+pool:
+  name: 'Ado Pool'
+
+variables:
+  AWS_SERVICE_CONNECTION: 'ado_terraform'
+
+stages:
+- stage: Init
+  jobs:
+  - job: TerraformInit
+    displayName: 'Terraform Init'
+    steps:
+    - script: |
+        sudo apt-get update
+        sudo apt-get install -y unzip
+      displayName: 'Install unzip'
+
+    - task: TerraformInstaller@0
+      inputs:
+        terraformVersion: 'latest'
+    
+    - task: TerraformTaskV2@2
+      inputs:
+        provider: 'aws'
+        command: 'init'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform'
+        backendServiceAWS: $(AWS_SERVICE_CONNECTION)
+        backendAWSBucketName: 'terraform-nada'
+        backendAWSKey: 'terraform.tfstate'
+      displayName: 'Terraform Init'
+
+- stage: Plan
+  condition: eq(variables['Build.Reason'], 'PullRequest')
+  jobs:
+  - job: TerraformPlan
+    displayName: 'Terraform Plan on PR'
+    steps:    
+    - task: TerraformInstaller@0
+      inputs:
+        terraformVersion: 'latest'
+    
+    - task: TerraformTaskV2@2
+      inputs:
+        provider: 'aws'
+        command: 'plan'
+        backendServiceAWS: $(AWS_SERVICE_CONNECTION)
+        backendAWSBucketName: 'terraform-nada'
+        backendAWSKey: 'terraform.tfstate'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform'
+        commandOptions: '-var-file=${{ parameters.ENV }}.tfvars'
+      displayName: 'Terraform Plan'
+
+- stage: ApplyOrDestroy
+  condition: eq(variables['Build.Reason'], 'Merge')
+  jobs:
+  - job: TerraformApplyOrDestroy
+    displayName: 'Terraform Apply or Destroy on Merge'
+    steps:
+    - task: TerraformInstaller@0
+      inputs:
+        terraformVersion: 'latest'
+    
+    - task: TerraformTaskV2@2
+      inputs:
+        provider: 'aws'
+        command: ${{ parameters.ACTION }}
+        backendServiceAWS: $(AWS_SERVICE_CONNECTION)
+        backendAWSBucketName: 'terraform-nada'
+        backendAWSKey: 'terraform.tfstate'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform'
+        commandOptions: '-auto-approve -var-file=${{ parameters.ENV }}.tfvars'
+      displayName: 'Terraform Apply or Destroy'
